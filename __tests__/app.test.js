@@ -3,12 +3,13 @@ const db = require("../db/connection")
 const request = require('supertest')
 const seed = require('../db/seeds/seed')
 const testData = require('../db/data/test-data/index.js')
+const endpoints = require('../endpoints.json')
 require('jest-sorted')
 
 beforeEach(() => seed(testData))
 afterAll(() => db.end())
 
-describe("General Functionality", () =>{
+describe("App.js error handling", () =>{
   test("Should return a 404 if given an endpoint that does not exist", () =>{
     return request(app)
     .get('/api/thisendpointdoesntexist')
@@ -18,6 +19,7 @@ describe("General Functionality", () =>{
     })
   })
 })
+
 describe("GET /api/topics", () =>{
   test("Should send an array of topics to the client", () =>{
     return request(app)
@@ -32,3 +34,14 @@ describe("GET /api/topics", () =>{
     });
   })
 })
+
+describe("GET /api", () => {
+  test("Should return all available endpoints with their descriptions, acceptable queries, formatting and example response", () => {
+    return request(app)
+      .get('/api')
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toEqual(endpoints);
+      });
+  });
+});
