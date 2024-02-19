@@ -1,7 +1,8 @@
 const express = require('express')
-const { getAllTopics} = require("./controllers/topics.controllers")
+const { getAllTopics } = require("./controllers/topics.controllers")
 const { pathNotFound, errorHandling } = require('./errorHandler')
 const { getAllEndpoints } = require('./controllers/endpoints.controllers')
+const { getArticleById } = require('./controllers/articles.controllers')
 
 const app = express()
 
@@ -10,6 +11,8 @@ app.use(express.json())
 app.get('/api/topics', getAllTopics)
 
 app.get('/api', getAllEndpoints)
+
+app.get('/api/articles/:article_id', getArticleById)
 
 app.all('/*', pathNotFound)
 
