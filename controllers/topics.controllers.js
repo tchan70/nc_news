@@ -1,4 +1,4 @@
-const { selectAllTopics } = require("../models/topics.models")
+const { selectAllTopics, selectAllEndpoints } = require("../models/topics.models")
 
 function getAllTopics(req, res, next){
   selectAllTopics()
