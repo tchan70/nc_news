@@ -45,3 +45,37 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/articles/:article_id", () =>{
+  test("Should send an article object to the client", () =>{
+    return request(app)
+    .get('/api/articles/1')
+    .expect(200)
+    .then((response) => {
+      expect(response.body.article).toHaveProperty('author')
+      expect(response.body.article).toHaveProperty('title')
+      expect(response.body.article).toHaveProperty('article_id')
+      expect(response.body.article).toHaveProperty('body')
+      expect(response.body.article).toHaveProperty('topic')
+      expect(response.body.article).toHaveProperty('created_at')
+      expect(response.body.article).toHaveProperty('votes')
+      expect(response.body.article).toHaveProperty('article_img_url')
+    })
+  })
+  test('Should send an appropriate status and error message when given a valid but non-existent id', () => {
+    return request(app)
+      .get('/api/articles/999999')
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe('article does not exist');
+      });
+  });
+  test('Should send an appropriate status and error message when given an invalid id', () => {
+    return request(app)
+      .get('/api/articles/not-an-article')
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Bad request');
+      });
+  });
+})
