@@ -1,6 +1,6 @@
 const express = require('express')
 const { getAllTopics } = require("./controllers/topics.controllers")
-const { pathNotFound, errorHandling } = require('./errorHandler')
+const { handleInvalidEndpoint, handlePSQLErrors, handleCustomErrors, handleServerErrors } = require('./errorHandler')
 const { getAllEndpoints } = require('./controllers/endpoints.controllers')
 const { getArticleById, getAllArticles } = require('./controllers/articles.controllers')
 
@@ -15,8 +15,12 @@ app.get('/api', getAllEndpoints)
 app.get('/api/articles/:article_id', getArticleById)
 app.get('/api/articles', getAllArticles)
 
-app.all('/*', pathNotFound)
+app.all('/*', handleInvalidEndpoint)
 
-app.use(errorHandling)
+app.use(handlePSQLErrors)
+
+app.use(handleCustomErrors)
+
+app.use(handleServerErrors)
 
 module.exports = app
