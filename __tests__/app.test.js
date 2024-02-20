@@ -31,7 +31,7 @@ describe("GET /api/topics", () =>{
         expect(typeof topic.description).toBe('string')
         expect(typeof topic.slug).toBe('string')
       })
-    });
+    })
   })
 })
 
@@ -42,9 +42,40 @@ describe("GET /api", () => {
       .expect(200)
       .then((response) => {
         expect(response.body).toEqual(endpoints);
-      });
-  });
-});
+      })
+  })
+})
+
+describe("GET /api/articles", () =>{
+  test("Should send an array of articles to the client", () =>{
+    return request(app)
+    .get('/api/articles')
+    .expect(200)
+    .then((response) => {
+      expect(response.body.articles.length).toBe(13)
+      response.body.articles.forEach((article) => {
+        expect(Object.keys(article).length).toBe(8)
+        expect(typeof article.title).toBe('string')
+        expect(typeof article.topic).toBe('string')
+        expect(typeof article.author).toBe('string')
+        expect(typeof article.comment_count).toBe('string')
+        expect(typeof article.created_at).toBe('string')
+        expect(typeof article.article_img_url).toBe('string')
+        expect(typeof article.article_id).toBe('number')
+        expect(typeof article.votes).toBe('number')
+        expect(article).not.toHaveProperty('body')
+      })
+    })
+  })
+  test("Should be sorted by date descending", () =>{
+    return request(app)
+    .get('/api/articles')
+    .expect(200)
+    .then((response) => {
+      expect(response.body.articles).toBeSortedBy('created_at', {descending: true})
+    })
+  })
+})
 
 describe("GET /api/articles/:article_id", () =>{
   test("Should send an article object to the client", () =>{
@@ -68,45 +99,59 @@ describe("GET /api/articles/:article_id", () =>{
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe('article does not exist');
-      });
-  });
+      })
+  })
   test('Should send an appropriate status and error message when given an invalid id', () => {
     return request(app)
       .get('/api/articles/not-an-article')
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe('Bad request');
-      });
-  });
+      })
+  })
 })
 
-describe("GET /api/articles", () =>{
-  test("Should send an array of articles to the client", () =>{
+describe("GET /api/articles/:article_id/comments", () =>{
+  test("Should send an array of comments to the client", () =>{
     return request(app)
-    .get('/api/articles')
+    .get('/api/articles/1/comments')
     .expect(200)
     .then((response) => {
-      expect(response.body.articles.length).toBe(13)
-      response.body.articles.forEach((article) => {
-        expect(Object.keys(article).length).toBe(8)
-        expect(typeof article.title).toBe('string')
-        expect(typeof article.topic).toBe('string')
-        expect(typeof article.author).toBe('string')
-        expect(typeof article.comment_count).toBe('string')
-        expect(typeof article.created_at).toBe('string')
-        expect(typeof article.article_img_url).toBe('string')
-        expect(typeof article.article_id).toBe('number')
-        expect(typeof article.votes).toBe('number')
-        expect(article).not.toHaveProperty('body')
+      expect(response.body.comments.length).toBe(11)
+      console.log(response.body.comments[0])
+      response.body.comments.forEach((comment) => {
+        expect(Object.keys(comment).length).toBe(6)
+        expect(typeof comment.comment_id).toBe('number')
+        expect(typeof comment.votes).toBe('number')
+        expect(typeof comment.created_at).toBe('string')
+        expect(typeof comment.author).toBe('string')
+        expect(typeof comment.body).toBe('string')
+        expect(typeof comment.article_id).toBe('number')
       })
     });
   })
-  test("Should be sorted by date descending", () =>{
+  test("Should be sorted by date descending(most recent first)", () =>{
     return request(app)
-    .get('/api/articles')
+    .get('/api/articles/1/comments')
     .expect(200)
     .then((response) => {
-      expect(response.body.articles).toBeSortedBy('created_at', {descending: true})
-    });
+      expect(response.body.comments).toBeSortedBy('created_at', {descending: true})
+    })
+  })
+  test('Should send an appropriate status and error message when given a valid but non-existent id', () => {
+    return request(app)
+      .get('/api/articles/999999/comments')
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe('article does not exist');
+      })
+  })
+  test('Should send an appropriate status and error message when given an invalid id', () => {
+    return request(app)
+      .get('/api/articles/not-an-article/comments')
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Bad request');
+      })
   })
 })
