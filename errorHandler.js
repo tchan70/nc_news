@@ -1,11 +1,11 @@
-function handleInvalidEndpoint(req, res, next){
+function handleInvalidEndpoint(req, res){
   res.status(404).send({msg: "Path not found"})
 }
 
 function handlePSQLErrors(err, req, res, next) {
-  if (err.code === '22P02'){
+  if (err.code === '22P02' || err.code === '23502'){
     res.status(400).send({msg: "Bad request"})
-  } 
+  }
   next(err)
 }
 
