@@ -98,7 +98,7 @@ describe("GET /api/articles/:article_id", () =>{
       .get('/api/articles/999999')
       .expect(404)
       .then((response) => {
-        expect(response.body.msg).toBe('article does not exist');
+        expect(response.body.msg).toBe('article does not exist')
       })
   })
   test('Should send an appropriate status and error message when given an invalid id', () => {
@@ -106,7 +106,7 @@ describe("GET /api/articles/:article_id", () =>{
       .get('/api/articles/not-an-article')
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe('Bad request');
+        expect(response.body.msg).toBe('Bad request')
       })
   })
 })
@@ -237,6 +237,88 @@ describe("POST /api/articles/:article_id/comments", () =>{
     return request(app)
     .post('/api/articles/Idontexist/comments')
     .send(newComment)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request');
+    })
+  })
+})
+
+describe("PATCH /api/articles/:article_id", () =>{
+  test("Should send an article object to the client", () =>{
+    const newVotes = {
+      inc_votes: 100
+    }
+    return request(app)
+    .patch('/api/articles/1')
+    .send(newVotes)
+    .expect(200)
+    .then((response) => {
+      expect(response.body.article).toHaveProperty('author')
+      expect(response.body.article).toHaveProperty('title')
+      expect(response.body.article).toHaveProperty('article_id')
+      expect(response.body.article).toHaveProperty('body')
+      expect(response.body.article).toHaveProperty('topic')
+      expect(response.body.article).toHaveProperty('created_at')
+      expect(response.body.article).toHaveProperty('votes')
+      expect(response.body.article).toHaveProperty('article_img_url')
+    })
+  })
+  test("Should send the correctly updated article to the client", () =>{
+    const newVotes = {
+      inc_votes: 100
+    }
+    return request(app)
+    .patch('/api/articles/1')
+    .send(newVotes)
+    .expect(200)
+    .then((response) => {
+      expect(response.body.article.votes).toBe(200)
+    })
+  })
+  test("Should send the correctly updated article to the client if the votes are negative", () =>{
+    const newVotes = {
+      inc_votes: -10
+    }
+    return request(app)
+    .patch('/api/articles/1')
+    .send(newVotes)
+    .expect(200)
+    .then((response) => {
+      expect(response.body.article.votes).toBe(90)
+    })
+  })
+  test('Should send an appropriate status and error message when given a valid but non-existent id', () => {
+    const newVotes = {
+      inc_votes: 100
+    }
+    return request(app)
+    .patch('/api/articles/100')
+    .send(newVotes)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe('article does not exist')
+    })
+  })
+  test('Should send an appropriate status and error message when given an invalid id', () => {
+    const newVotes = {
+      inc_votes: 100
+    }
+    return request(app)
+      .patch('/api/articles/not-an-article')
+      .send(newVotes)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe('Bad request');
+      })
+  })
+  test('Should send an appropriate status and error message when given an invalid object', () => {
+    const newVotes = {
+      this_is: "wrong"
+    }
+    return request(app)
+    .patch('/api/articles/not-an-article')
+    .send(newVotes)
     .expect(400)
     .then((response) => {
       expect(response.body.msg).toBe('Bad request');

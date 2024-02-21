@@ -1,4 +1,4 @@
-const { selectArticleById, selectAllArticles, selectCommentsByArticleId, insertComment} = require("../models/articles.models")
+const { selectArticleById, selectAllArticles, selectCommentsByArticleId, insertComment, updateArticleById} = require("../models/articles.models")
 
 function getAllArticles(req, res, next){
   selectAllArticles()
@@ -15,6 +15,17 @@ function getArticleById(req, res, next){
     res.status(200).send({article})
   })
   .catch(next)
+}
+
+function patchArticleById(req, res, next){
+ const {article_id} = req.params
+ const {inc_votes} = req.body
+ const promises = [selectArticleById(article_id), updateArticleById(article_id, inc_votes)]
+ Promise.all(promises)
+ .then((updatedArticle) =>{
+  res.status(200).send({article: updatedArticle[1]})
+ })
+ .catch(next)
 }
 
 function getCommentsFromArticleId(req, res, next){
@@ -43,4 +54,4 @@ function postCommentToArticle(req, res, next){
   .catch(next)
 }
 
-module.exports = { getArticleById, getAllArticles, getCommentsFromArticleId, postCommentToArticle}
+module.exports = { getAllArticles, getArticleById, patchArticleById, getCommentsFromArticleId, postCommentToArticle}
