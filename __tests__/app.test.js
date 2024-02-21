@@ -118,7 +118,6 @@ describe("GET /api/articles/:article_id/comments", () =>{
     .expect(200)
     .then((response) => {
       expect(response.body.comments.length).toBe(11)
-      console.log(response.body.comments[0])
       response.body.comments.forEach((comment) => {
         expect(Object.keys(comment).length).toBe(6)
         expect(typeof comment.comment_id).toBe('number')
@@ -138,6 +137,11 @@ describe("GET /api/articles/:article_id/comments", () =>{
       expect(response.body.comments).toBeSortedBy('created_at', {descending: true})
     })
   })
+  test('Should get a 204 if given a valid, existing id with no comments', () => {
+    return request(app)
+      .get('/api/articles/10/comments')
+      .expect(204)
+  })
   test('Should send an appropriate status and error message when given a valid but non-existent id', () => {
     return request(app)
       .get('/api/articles/999999/comments')
@@ -153,5 +157,89 @@ describe("GET /api/articles/:article_id/comments", () =>{
       .then((response) => {
         expect(response.body.msg).toBe('Bad request');
       })
+  })
+})
+
+describe("POST /api/articles/:article_id/comments", () =>{
+  test('Should send the posted comment to the client if the username is an existing user', () =>{
+    const newComment = {
+      username: 'butter_bridge',
+      body: 'I like to comment a lot :)'
+    }
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(201)
+      .then((response) =>{
+        expect(response.body.comment.article_id).toBe(1)
+        expect(response.body.comment.author).toBe('butter_bridge')
+        expect(response.body.comment.body).toBe('I like to comment a lot :)')
+        expect(response.body.comment).toHaveProperty('comment_id')
+        expect(response.body.comment).toHaveProperty('votes')
+        expect(response.body.comment).toHaveProperty('created_at')
+      })
+  })
+  test('Should send an appropriate status and error message when given a valid but non-existent id', () => {
+    const newComment = {
+      username: 'butter_bridge',
+      body: 'I like to comment a lot :)'
+    }
+    return request(app)
+    .post('/api/articles/100/comments')
+    .send(newComment)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe('article does not exist');
+    })
+  })
+  test('Should send an appropriate status and error message when given an invalid id', () => {
+    const newComment = {
+      username: 'butter_bridge',
+      body: 'I like to comment a lot :)'
+    }
+    return request(app)
+    .post('/api/articles/Idontexist/comments')
+    .send(newComment)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request');
+    })
+  })
+  test('Should send an appropriate status and error message when given a comment with no body', () => {
+    const newComment = {
+      username: 'butter_bridge'
+    }
+    return request(app)
+    .post('/api/articles/Idontexist/comments')
+    .send(newComment)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request');
+    })
+  })
+  test('Should send an appropriate status and error message when given a comment with no username', () => {
+    const newComment = {
+      body: 'I like to comment a lot :)'
+    }
+    return request(app)
+    .post('/api/articles/Idontexist/comments')
+    .send(newComment)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request');
+    })
+  })
+  test('Should send an appropriate status and error message when given a comment with a username that is not in the users database', () => {
+    const newComment = {
+      username: 'WebsiteSuperCommenter',
+      body: 'I like to comment a lot :)'
+    }
+    return request(app)
+    .post('/api/articles/Idontexist/comments')
+    .send(newComment)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request');
+    })
   })
 })
