@@ -1,10 +1,16 @@
 const { selectArticleById, selectAllArticles, selectCommentsByArticleId, insertComment, updateArticleById} = require("../models/articles.models")
+const { selectTopicByName } = require("../models/topics.models")
 const { selectUserByUsername } = require("../models/users.models")
 
 function getAllArticles(req, res, next){
-  selectAllArticles()
+  const { topic } = req.query
+  const promises = [selectAllArticles(topic)]
+  if (topic) {
+    promises.push(selectTopicByName(topic))
+  }
+  Promise.all(promises)
   .then((articles) =>{
-    res.status(200).send({articles})
+    res.status(200).send({articles: articles[0]})
   })
   .catch(next)
 }
