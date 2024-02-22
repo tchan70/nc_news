@@ -35,6 +35,7 @@
     "description": "serves specific article object by its id",
     "queries": [],
     "exampleResponse": {
+        "comment_count": "5",
         "article_id": 1,
         "title": "Living in the shadow of a great man",
         "topic": "mitch",
