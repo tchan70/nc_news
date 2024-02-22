@@ -1,4 +1,5 @@
 const { selectArticleById, selectAllArticles, selectCommentsByArticleId, insertComment, updateArticleById} = require("../models/articles.models")
+const { selectUserByUsername } = require("../models/users.models")
 
 function getAllArticles(req, res, next){
   selectAllArticles()
@@ -46,10 +47,10 @@ function getCommentsFromArticleId(req, res, next){
 function postCommentToArticle(req, res, next){
   const {article_id} = req.params
   const {username, body} = req.body
-  const promises = [selectArticleById(article_id), insertComment(article_id, username, body)]
+  const promises = [selectArticleById(article_id), selectUserByUsername(username), insertComment(article_id, username, body)]
   Promise.all(promises)
   .then((comment) =>{
-    res.status(201).send({ comment: comment[1] })
+    res.status(201).send({ comment: comment[2] })
   })
   .catch(next)
 }
