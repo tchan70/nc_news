@@ -171,12 +171,34 @@ describe("POST /api/articles/:article_id/comments", () =>{
       .send(newComment)
       .expect(201)
       .then((response) =>{
-        expect(response.body.comment.article_id).toBe(1)
-        expect(response.body.comment.author).toBe('butter_bridge')
-        expect(response.body.comment.body).toBe('I like to comment a lot :)')
-        expect(response.body.comment).toHaveProperty('comment_id')
-        expect(response.body.comment).toHaveProperty('votes')
-        expect(response.body.comment).toHaveProperty('created_at')
+        const {comment} = response.body
+        expect(comment.article_id).toBe(1)
+        expect(comment.author).toBe('butter_bridge')
+        expect(comment.body).toBe('I like to comment a lot :)')
+        expect(comment).toHaveProperty('comment_id')
+        expect(comment).toHaveProperty('votes')
+        expect(comment).toHaveProperty('created_at')
+      })
+  })
+  test('Should send the posted comment to the client without the extra properties', () =>{
+    const newComment = {
+      username: 'butter_bridge',
+      body: 'I like to comment a lot :)',
+      extras: 'This is extra stuff that is not needed!'
+    }
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(201)
+      .then((response) =>{
+        const {comment} = response.body
+        expect(comment.article_id).toBe(1)
+        expect(comment.author).toBe('butter_bridge')
+        expect(comment.body).toBe('I like to comment a lot :)')
+        expect(comment).toHaveProperty('comment_id')
+        expect(comment).toHaveProperty('votes')
+        expect(comment).toHaveProperty('created_at')
+        expect(comment).not.toHaveProperty('extras')
       })
   })
   test('Should send an appropriate status and error message when given a valid but non-existent id', () => {
@@ -210,7 +232,7 @@ describe("POST /api/articles/:article_id/comments", () =>{
       username: 'butter_bridge'
     }
     return request(app)
-    .post('/api/articles/Idontexist/comments')
+    .post('/api/articles/1/comments')
     .send(newComment)
     .expect(400)
     .then((response) => {
@@ -229,23 +251,23 @@ describe("POST /api/articles/:article_id/comments", () =>{
       expect(response.body.msg).toBe('Bad request');
     })
   })
-  test('Should send an appropriate status and error message when given a comment with a username that is not in the users database', () => {
+  test('Should send an appropriate status and error message when given a comment with a valid username but it is not in the users database', () => {
     const newComment = {
       username: 'WebsiteSuperCommenter',
       body: 'I like to comment a lot :)'
     }
     return request(app)
-    .post('/api/articles/Idontexist/comments')
+    .post('/api/articles/1/comments')
     .send(newComment)
-    .expect(400)
+    .expect(404)
     .then((response) => {
-      expect(response.body.msg).toBe('Bad request');
+      expect(response.body.msg).toBe('username does not exist');
     })
   })
 })
 
 describe("PATCH /api/articles/:article_id", () =>{
-  test("Should send an article object to the client", () =>{
+  test("Should send an article object to the client with the correct properties of an article", () =>{
     const newVotes = {
       inc_votes: 100
     }
@@ -254,14 +276,15 @@ describe("PATCH /api/articles/:article_id", () =>{
     .send(newVotes)
     .expect(200)
     .then((response) => {
-      expect(response.body.article).toHaveProperty('author')
-      expect(response.body.article).toHaveProperty('title')
-      expect(response.body.article).toHaveProperty('article_id')
-      expect(response.body.article).toHaveProperty('body')
-      expect(response.body.article).toHaveProperty('topic')
-      expect(response.body.article).toHaveProperty('created_at')
-      expect(response.body.article).toHaveProperty('votes')
-      expect(response.body.article).toHaveProperty('article_img_url')
+      const {article} = response.body
+      expect(article).toHaveProperty('author')
+      expect(article).toHaveProperty('title')
+      expect(article).toHaveProperty('article_id')
+      expect(article).toHaveProperty('body')
+      expect(article).toHaveProperty('topic')
+      expect(article).toHaveProperty('created_at')
+      expect(article).toHaveProperty('votes')
+      expect(article).toHaveProperty('article_img_url')
     })
   })
   test("Should send the correctly updated article to the client", () =>{
@@ -300,6 +323,18 @@ describe("PATCH /api/articles/:article_id", () =>{
       expect(response.body.msg).toBe('article does not exist')
     })
   })
+  test('Should send an appropriate status and error message when given a valid key but invalid value for votes', () => {
+    const newVotes = {
+      inc_votes: "this is wrong"
+    }
+    return request(app)
+    .patch('/api/articles/1')
+    .send(newVotes)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  })
   test('Should send an appropriate status and error message when given an invalid id', () => {
     const newVotes = {
       inc_votes: 100
@@ -317,11 +352,39 @@ describe("PATCH /api/articles/:article_id", () =>{
       this_is: "wrong"
     }
     return request(app)
-    .patch('/api/articles/not-an-article')
+    .patch('/api/articles/1')
     .send(newVotes)
     .expect(400)
     .then((response) => {
       expect(response.body.msg).toBe('Bad request');
     })
+  })
+})
+
+describe("DELETE /api/comments/:comment_id", () =>{
+  test("Should receive a status 204 with no content", () =>{
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then((response) => {
+        const comment = [response.body];
+        expect(Object.keys(comment[0]).length).toBe(0);
+      })
+  })
+  test("Should send an appropriate status and error message when given an invalid id", () => {
+    return request(app)
+      .delete("/api/comments/not-an-id")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad request");
+      })
+  })
+  test("Should send an appropriate status and error message when given a valid but non-existent id", () => {
+    return request(app)
+      .delete("/api/comments/1000")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("comment does not exist");
+      })
   })
 })
