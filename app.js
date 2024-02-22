@@ -4,6 +4,7 @@ const { handleInvalidEndpoint, handlePSQLErrors, handleCustomErrors, handleServe
 const { getAllEndpoints } = require('./controllers/endpoints.controllers')
 const { getArticleById, getAllArticles, getCommentsFromArticleId, postCommentToArticle, patchArticleById} = require('./controllers/articles.controllers')
 const { deleteCommentById } = require('./controllers/comments.controllers')
+const { getAllUsers } = require('./controllers/users.controllers')
 
 const app = express()
 
@@ -22,6 +23,8 @@ app.get('/api/articles/:article_id/comments', getCommentsFromArticleId)
 app.post('/api/articles/:article_id/comments', postCommentToArticle)
 
 app.delete('/api/comments/:comment_id', deleteCommentById)
+
+app.get('/api/users', getAllUsers)
 
 app.all('/*', handleInvalidEndpoint)
 
