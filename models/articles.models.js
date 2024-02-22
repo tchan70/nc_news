@@ -69,4 +69,9 @@ function updateArticleById(article_id, newVote){
   })
 }
 
-module.exports = { selectArticleById, selectAllArticles, selectCommentsByArticleId, insertComment, updateArticleById}
+function countCommentsByArticleId(article_id) {
+  return db.query('SELECT COUNT(*) FROM comments WHERE article_id = $1;', [article_id])
+  .then((result) => result.rows[0].count)
+}
+
+module.exports = { selectArticleById, selectAllArticles, selectCommentsByArticleId, insertComment, updateArticleById, countCommentsByArticleId}
