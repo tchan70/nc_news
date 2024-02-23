@@ -1,8 +1,8 @@
-# Northcoders News API
+# Toby News API
 
 Overview
 
-Welcome to the Northcoders News API! This project serves as a backend service for accessing application data programmatically, similar to popular platforms like Reddit. Built with Node.js and PostgreSQL, this API provides endpoints to interact with various resources such as topics, articles, comments, and users.
+Welcome to the Toby News API! This project serves as a backend service for accessing application data programmatically, similar to popular platforms like Reddit. Built with Node.js and PostgreSQL, this API provides endpoints to interact with various resources such as topics, articles, comments, and users.
 
 You can access the hosted version of the News API at https://toby-news.onrender.com
 
