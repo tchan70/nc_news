@@ -17,10 +17,8 @@ function getAllArticles(req, res, next){
 
 function getArticleById(req, res, next){
   const {article_id} = req.params
-  const promises = [selectArticleById(article_id), countCommentsByArticleId(article_id)]
-  Promise.all(promises)
-  .then(([article, comment_count]) =>{
-    article.comment_count = comment_count
+  selectArticleById(article_id)
+  .then((article) =>{
     res.status(200).send({article})
   })
   .catch(next)
