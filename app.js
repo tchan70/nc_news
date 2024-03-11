@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const { getAllTopics } = require("./controllers/topics.controllers")
 const { handleInvalidEndpoint, handlePSQLErrors, handleCustomErrors, handleServerErrors } = require('./errorHandler')
 const { getAllEndpoints } = require('./controllers/endpoints.controllers')
@@ -9,6 +10,7 @@ const { getAllUsers } = require('./controllers/users.controllers')
 const app = express()
 
 app.use(express.json())
+app.use(cors())
 
 app.get('/api/topics', getAllTopics)
 
