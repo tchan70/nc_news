@@ -77,26 +77,6 @@ describe("GET /api/articles", () =>{
   })
   describe("Queries", () =>{
     describe("topic", () =>{
-      test("Should send all articles when no topic query is provided", () =>{
-        return request(app)
-        .get('/api/articles')
-        .expect(200)
-        .then((response) => {
-          expect(response.body.articles.length).toBe(13)
-          response.body.articles.forEach((article) => {
-            expect(Object.keys(article).length).toBe(8)
-            expect(typeof article.title).toBe('string')
-            expect(typeof article.topic).toBe('string')
-            expect(typeof article.author).toBe('string')
-            expect(typeof article.comment_count).toBe('string')
-            expect(typeof article.created_at).toBe('string')
-            expect(typeof article.article_img_url).toBe('string')
-            expect(typeof article.article_id).toBe('number')
-            expect(typeof article.votes).toBe('number')
-            expect(article).not.toHaveProperty('body')
-          })
-        })
-      })
       test("Should send all articles filtered by topic when a valid topic is input", () =>{
         return request(app)
         .get('/api/articles?topic=mitch')
@@ -115,6 +95,14 @@ describe("GET /api/articles", () =>{
             expect(typeof article.votes).toBe('number')
             expect(article).not.toHaveProperty('body')
           })
+        })
+      })
+      test("Should send an empty array when a valid topic is provided with no articles", () =>{
+        return request(app)
+        .get('/api/articles?topic=paper')
+        .expect(200)
+        .then((response) => {
+          expect(response.body.articles.length).toBe(0)
         })
       })
       test("Should send an appropriate status and error message when given a non-existent topic", () =>{
